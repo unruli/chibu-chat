@@ -31,7 +31,7 @@ print_banner()
 
 # -----------------------------------------------------------------------------
 # User settings
-run = "dummy" # wandb run name default ("dummy" is special - we won't log to wandb)
+run = os.getenv("WANDB_RUN", "dummy") # wandb run name from env var, fallback to "dummy"
 # Runtime
 device_type = "" # cuda|cpu|mps (empty => autodetect good device type default, in order: CUDA > MPS > CPU)
 # Model architecture
@@ -78,7 +78,7 @@ get_max_memory = torch.cuda.max_memory_allocated if device_type == "cuda" else l
 
 # wandb logging init
 use_dummy_wandb = run == "dummy" or not master_process
-wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(project="nanochat", name=run, config=user_config)
+wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(project="chibuchatGpt", name=run, config=user_config)
 
 # Tokenizer will be useful for evaluation, also we need the vocab size
 tokenizer = get_tokenizer()
@@ -129,7 +129,15 @@ if resuming:
     del model_data # free up this memory after the copy
 
 orig_model = model # original, uncompiled model, for saving raw model state_dict and for inference/evaluation (because the shapes may change shape)
-model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+
+# Check if torch.compile should be disabled (useful for debugging or SLURM compatibility)
+use_compile = os.environ.get("TORCH_COMPILE_DISABLE", "0") != "1"
+if use_compile:
+    print0("Using torch.compile() for optimized training")
+    model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+else:
+    print0("torch.compile() DISABLED via TORCH_COMPILE_DISABLE=1 (using eager mode)")
+
 num_params = sum(p.numel() for p in model.parameters())
 print0(f"Number of parameters: {num_params:,}")
 num_flops_per_token = model.estimate_flops()

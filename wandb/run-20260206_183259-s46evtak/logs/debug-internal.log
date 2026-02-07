@@ -1,0 +1,6 @@
+{"time":"2026-02-06T18:33:00.505987093-05:00","level":"INFO","msg":"stream: starting","core version":"0.21.3"}
+{"time":"2026-02-06T18:33:00.785419234-05:00","level":"INFO","msg":"stream: created new stream","id":"s46evtak"}
+{"time":"2026-02-06T18:33:00.785458212-05:00","level":"INFO","msg":"stream: started","id":"s46evtak"}
+{"time":"2026-02-06T18:33:00.785630403-05:00","level":"INFO","msg":"writer: started","stream_id":"s46evtak"}
+{"time":"2026-02-06T18:33:00.785747551-05:00","level":"INFO","msg":"sender: started","stream_id":"s46evtak"}
+{"time":"2026-02-06T18:33:00.785818162-05:00","level":"INFO","msg":"handler: started","stream_id":"s46evtak"}

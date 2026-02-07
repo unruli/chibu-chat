@@ -1,0 +1,6 @@
+{"time":"2026-01-31T00:20:03.022335545-05:00","level":"INFO","msg":"stream: starting","core version":"0.21.3"}
+{"time":"2026-01-31T00:20:03.266093192-05:00","level":"INFO","msg":"stream: created new stream","id":"boobesz5"}
+{"time":"2026-01-31T00:20:03.266137043-05:00","level":"INFO","msg":"stream: started","id":"boobesz5"}
+{"time":"2026-01-31T00:20:03.266149258-05:00","level":"INFO","msg":"writer: started","stream_id":"boobesz5"}
+{"time":"2026-01-31T00:20:03.266150615-05:00","level":"INFO","msg":"sender: started","stream_id":"boobesz5"}
+{"time":"2026-01-31T00:20:03.266164388-05:00","level":"INFO","msg":"handler: started","stream_id":"boobesz5"}
