@@ -1,7 +1,0 @@
-{"time":"2026-02-06T14:31:16.955297533-05:00","level":"INFO","msg":"stream: starting","core version":"0.21.3"}
-{"time":"2026-02-06T14:31:17.318161313-05:00","level":"INFO","msg":"stream: created new stream","id":"ka75b1yz"}
-{"time":"2026-02-06T14:31:17.318197201-05:00","level":"INFO","msg":"stream: started","id":"ka75b1yz"}
-{"time":"2026-02-06T14:31:17.318398658-05:00","level":"INFO","msg":"writer: started","stream_id":"ka75b1yz"}
-{"time":"2026-02-06T14:31:17.318542483-05:00","level":"INFO","msg":"handler: started","stream_id":"ka75b1yz"}
-{"time":"2026-02-06T14:31:17.318592458-05:00","level":"INFO","msg":"sender: started","stream_id":"ka75b1yz"}
-{"time":"2026-02-06T15:26:48.18471279-05:00","level":"INFO","msg":"api: retrying HTTP error","status":502,"url":"https://api.wandb.ai/files/c-okocha-university-of-florida/chibuchatGpt/ka75b1yz/file_stream","body":"\n<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<title>502 Server Error</title>\n</head>\n<body text=#000000 bgcolor=#ffffff>\n<h1>Error: Server Error</h1>\n<h2>The server encountered a temporary error and could not complete your request.<p>Please try again in 30 seconds.</h2>\n<h2></h2>\n</body></html>\n"}

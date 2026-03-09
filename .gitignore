@@ -3,5 +3,24 @@ __pycache__/
 *.pyc
 rustbpe/target/
 dev-ignore/
+
+# Training outputs and large artifacts
+wandb/
+logs/
+*.log
+*.out
+*.err
+*.wandb
+
+# Model/checkpoint artifacts
+**/checkpoints/
+**/*_checkpoints/
+*.pt
+*.bin
+*.safetensors
+
+# Local caches / datasets
+.cache/
+.tmp/
 report.md
-eval_bundle/
+

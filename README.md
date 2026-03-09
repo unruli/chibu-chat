@@ -1,10 +1,10 @@
-# nanochat
+# chibuchat
 
-![nanochat logo](dev/nanochat.png)
+![chibuchat logo](dev/nanochat.png)
 
 > The best ChatGPT that $100 can buy.
 
-## Trelis Tips
+## Chibuchat Tips
 To get started with a runpod one-click template (affiliate), click [here](https://console.runpod.io/deploy?template=ikas3s2cii&ref=jmfkcdio), select 8 x H100 SXM (or you can try NVL or PCIe or A100 [slowest]) and then ssh in and run speedrun as below.
 
 The Runpod template injects the following variables, which you'll want to set via secrets:
@@ -12,7 +12,7 @@ The Runpod template injects the following variables, which you'll want to set vi
 
 Once ssh'd in, you can install `screen` and start the whole run:
 ```bash
-cd ~/nanochat
+cd ~/chibu-chat
 apt-get update && apt-get install -y screen
 export WANDB_RUN=d20
 screen -L -Logfile speedrun.log -S speedrun bash speedrun.sh
@@ -33,16 +33,16 @@ Reuse your original session, if still running, with `screen -r speedrun`, or sta
 source .venv/bin/activate
 export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
 # Base/Mid/SFT checkpoints into subfolders of one repo
-python -m scripts.push_to_hf --stage base --repo-id Trelis/nanochat --path-in-repo base/d20
-python -m scripts.push_to_hf --stage mid  --repo-id Trelis/nanochat --path-in-repo mid/d20
-python -m scripts.push_to_hf --stage sft  --repo-id Trelis/nanochat --path-in-repo sft/d20
+python -m scripts.push_to_hf --stage base --repo-id unruli/chibu-chat --path-in-repo base/d20
+python -m scripts.push_to_hf --stage mid  --repo-id unruli/chibu-chat --path-in-repo mid/d20
+python -m scripts.push_to_hf --stage sft  --repo-id unruli/chibu-chat --path-in-repo sft/d20
 
 # Report + Tokenizer folders (use --model-dir explicitly)
 # export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
 python -m scripts.push_to_hf --model-dir "$NANOCHAT_BASE_DIR/report" \
-  --repo-id Trelis/nanochat --path-in-repo report/latest
+  --repo-id unruli/chibu-chat --path-in-repo report/latest
 python -m scripts.push_to_hf --model-dir "$NANOCHAT_BASE_DIR/tokenizer" \
-  --repo-id Trelis/nanochat --path-in-repo tokenizer/latest
+  --repo-id unruli/chibu-chat --path-in-repo tokenizer/latest
 ```
 
 ### Downloading checkpoints from HuggingFace
@@ -54,14 +54,14 @@ uv sync --extra gpu
 source .venv/bin/activate
 
 # Example: grab SFT d20 into the local cache
-python -m scripts.pull_from_hf --repo-id Trelis/nanochat \
+python -m scripts.pull_from_hf --repo-id unruli/chibu-chat \
   --repo-path sft/d20 --stage sft --target-tag d20
 
 # Tokenizer / report assets
 export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
-python -m scripts.pull_from_hf --repo-id Trelis/nanochat \
+python -m scripts.pull_from_hf --repo-id unruli/chibu-chat \
   --repo-path tokenizer/latest --dest-dir "$NANOCHAT_BASE_DIR/tokenizer"
-python -m scripts.pull_from_hf --repo-id Trelis/nanochat \
+python -m scripts.pull_from_hf --repo-id unruli/chibu-chat \
   --repo-path report/latest --dest-dir "$NANOCHAT_BASE_DIR/report"
 ```
 Downloads land in `$NANOCHAT_BASE_DIR/{base,mid,chatsft}` (or the `--dest-dir` you provided), so scripts like `chat_web` see them right away.
@@ -75,16 +75,16 @@ python -m scripts.chat_web
 ```
 and then access it via `https://21kgtegp93ibt7-8000.proxy.runpod.net`.
 
-## About NanoChat
-This repo is a full-stack implementation of an LLM like ChatGPT in a single, clean, minimal, hackable, dependency-lite codebase. nanochat is designed to run on a single 8XH100 node via scripts like [speedrun.sh](speedrun.sh), that run the entire pipeline start to end. This includes tokenization, pretraining, finetuning, evaluation, inference, and web serving over a simple UI so that you can talk to your own LLM just like ChatGPT. nanochat will become the capstone project of the course LLM101n being developed by Eureka Labs.
+## About ChibuChat
+This repo is a full-stack implementation of an LLM like ChatGPT in a single, clean, minimal, hackable, dependency-lite codebase. chibuchat is designed to run on a single 8XH100 node via scripts like [speedrun.sh](speedrun.sh), that run the entire pipeline start to end. This includes tokenization, pretraining, finetuning, evaluation, inference, and web serving over a simple UI so that you can talk to your own LLM just like ChatGPT. chibuchat is maintained as its own project direction.
 
 ## Talk to it
 
-To get a sense of the endpoint of this repo, you can currently find [nanochat d32](https://github.com/karpathy/nanochat/discussions/8) hosted on [nanochat.karpathy.ai](https://nanochat.karpathy.ai/). "d32" means that this model has 32 layers in the Transformer neural network. This model has 1.9 billion parameters, it was trained on 38 billion tokens by simply running the single script [run1000.sh](run1000.sh), and the total cost of training was ~$800 (about 33 hours training time on 8XH100 GPU node). While today this is enough to outperform GPT-2 of 2019, it falls dramatically short of modern Large Language Models like GPT-5. When talking to these micro models, you'll see that they make a lot of mistakes, they are a little bit naive and silly and they hallucinate a ton, a bit like children. It's kind of amusing. But what makes nanochat unique is that it is fully yours - fully configurable, tweakable, hackable, and trained by you from start to end. To train and talk to your own, we turn to...
+To get a sense of the endpoint of this repo, you can currently find [chibuchat d32](https://github.com/karpathy/nanochat/discussions/8) hosted on [nanochat.karpathy.ai](https://nanochat.karpathy.ai/). "d32" means that this model has 32 layers in the Transformer neural network. This model has 1.9 billion parameters, it was trained on 38 billion tokens by simply running the single script [run1000.sh](run1000.sh), and the total cost of training was ~$800 (about 33 hours training time on 8XH100 GPU node). While today this is enough to outperform GPT-2 of 2019, it falls dramatically short of modern Large Language Models like GPT-5. When talking to these micro models, you'll see that they make a lot of mistakes, they are a little bit naive and silly and they hallucinate a ton, a bit like children. It's kind of amusing. But what makes chibuchat unique is that it is fully yours - fully configurable, tweakable, hackable, and trained by you from start to end. To train and talk to your own, we turn to...
 
 ## Quick start
 
-The fastest way to feel the magic is to run the speedrun script [speedrun.sh](speedrun.sh), which trains and inferences the $100 tier of nanochat. On an 8XH100 node at $24/hr, this gives a total run time of about 4 hours. Boot up a new 8XH100 GPU box from your favorite provider (e.g. I use and like [Lambda](https://lambda.ai/service/gpu-cloud)), and kick off the training script:
+The fastest way to feel the magic is to run the speedrun script [speedrun.sh](speedrun.sh), which trains and inferences the $100 tier of chibuchat. On an 8XH100 node at $24/hr, this gives a total run time of about 4 hours. Boot up a new 8XH100 GPU box from your favorite provider (e.g. I use and like [Lambda](https://lambda.ai/service/gpu-cloud)), and kick off the training script:
 
 ```bash
 bash speedrun.sh
@@ -134,7 +134,7 @@ Total wall clock time: 3h51m
 
 ---
 
-(Your table might be missing the RL number by default). For a lot more information around the speedrun script and what to look for and expect, please refer to the walkthrough that I posted in Discussions of the repo: ["Introducing nanochat: The best ChatGPT that $100 can buy"](https://github.com/karpathy/nanochat/discussions/1).
+(Your table might be missing the RL number by default). For a lot more information around the speedrun script and what to look for and expect, please refer to the walkthrough that I posted in Discussions of the repo: ["Introducing chibuchat: The best ChatGPT that $100 can buy"](https://github.com/karpathy/nanochat/discussions/1).
 
 ## Bigger models
 
@@ -158,7 +158,7 @@ torchrun --standalone --nproc_per_node=8 -m scripts.mid_train -- --device_batch_
 
 That's it! The biggest thing to pay attention to is making sure you have enough data shards to train on (the code will loop and do more epochs over the same training set otherwise, decreasing learning speed a bit), and managing your memory/VRAM, primarily by decreasing the `device_batch_size` until things fit (the scripts automatically compensate by increasing the number of gradient accumulation loops, simply turning parallel compute to sequential compute).
 
-And a bit more about computing environments that will run nanochat:
+And a bit more about computing environments that will run chibuchat:
 
 - The code will run just fine on the Ampere 8XA100 GPU node as well, but a bit slower.
 - All code will run just fine on even a single GPU by omitting `torchrun`, and will produce ~identical results (code will automatically switch to gradient accumulation), but you'll have to wait 8 times longer.
@@ -167,17 +167,17 @@ And a bit more about computing environments that will run nanochat:
 
 ## Running on CPU / MPS
 
-nanochat can be run on CPU or on MPS (if you're on Macbook), and will automatically try to detect what device is best to run on. You're not going to get too far without GPUs, but at least you'll be able to run the code paths and maybe train a tiny LLM with some patience. For an example of how to make all the run commands much smaller (feel free to tune!), you can refer to [dev/runcpu.sh](dev/runcpu.sh) file. You'll see that I'm essentially restricting all scripts to train smaller models, to run for shorter number of iterations, etc. This functionality is new, slightly gnarly (touched a lot of code), and was merged in this [CPU|MPS PR](https://github.com/karpathy/nanochat/pull/88) on Oct 21, 2025.
+chibuchat can be run on CPU or on MPS (if you're on Macbook), and will automatically try to detect what device is best to run on. You're not going to get too far without GPUs, but at least you'll be able to run the code paths and maybe train a tiny LLM with some patience. For an example of how to make all the run commands much smaller (feel free to tune!), you can refer to [dev/run=cpu.sh](dev/runcpu.sh) file. You'll see that I'm essentially restricting all scripts to train smaller models, to run for shorter number of iterations, etc. This functionality is new, slightly gnarly (touched a lot of code), and was merged in this [CPU|MPS PR](https://github.com/karpathy/nanochat/pull/88) on Oct 21, 2025.
 
 ## Customization
 
-To customize your nanochat, see [Guide: infusing identity to your nanochat](https://github.com/karpathy/nanochat/discussions/139) in Discussions, which describes how you can tune your nanochat's personality through synthetic data generation and mixing that data into midtraining and SFT stages.
+To customize your chibuchat, see [Guide: infusing identity to your nanochat](https://github.com/karpathy/nanochat/discussions/139) in Discussions, which describes how you can tune your chibuchat personality through synthetic data generation and mixing that data into midtraining and SFT stages.
 
-Additionally, to add new abilities to nanochat, see [Guide: counting r in strawberry (and how to add abilities generally)](https://github.com/karpathy/nanochat/discussions/164).
+Additionally, to add new abilities to chibuchat, see [Guide: counting r in strawberry (and how to add abilities generally)](https://github.com/karpathy/nanochat/discussions/164).
 
 ## Questions
 
-nanochat is designed to be short and sweet. One big advantage of this is that we can package up all of the files together and copy paste them to your favorite LLM to ask arbitrary questions. As an example, I like to package up the repo using the [files-to-prompt](https://github.com/simonw/files-to-prompt) utility like so:
+chibuchat is designed to be short and sweet. One big advantage of this is that we can package up all of the files together and copy paste them to your favorite LLM to ask arbitrary questions. As an example, I like to package up the repo using the [files-to-prompt](https://github.com/simonw/files-to-prompt) utility like so:
 
 ```bash
 files-to-prompt . -e py -e md -e rs -e html -e toml -e sh --ignore "*target*" --cxml > packaged.txt
@@ -222,11 +222,11 @@ python -m pytest tests/test_rustbpe.py -v -s
 │   ├── logo.svg
 │   ├── loss_eval.py                # Evaluate bits per byte (instead of loss)
 │   ├── muon.py                     # Distributed Muon optimizer
-│   ├── report.py                   # Utilities for writing the nanochat Report
+│   ├── report.py                   # Utilities for writing the chibuchat report
 │   ├── tokenizer.py                # BPE Tokenizer wrapper in style of GPT-4
-│   └── ui.html                     # HTML/CSS/JS for nanochat frontend
+│   └── ui.html                     # HTML/CSS/JS for chibuchat frontend
 ├── pyproject.toml
-├── run1000.sh                      # Train the ~$800 nanochat d32
+├── run1000.sh                      # Train the ~$800 chibuchat d32
 ├── rustbpe                         # Custom Rust BPE tokenizer trainer
 │   ├── Cargo.lock
 │   ├── Cargo.toml
@@ -245,7 +245,7 @@ python -m pytest tests/test_rustbpe.py -v -s
 │   ├── mid_train.py                # Chat model: midtraining
 │   ├── tok_eval.py                 # Tokenizer: evaluate compression rate
 │   └── tok_train.py                # Tokenizer: train it
-├── speedrun.sh                     # Train the ~$100 nanochat d20
+├── speedrun.sh                     # Train the ~$100 chibuchat d20
 ├── tasks
 │   ├── arc.py                      # Multiple choice science questions
 │   ├── common.py                   # TaskMixture | TaskSequence
@@ -261,34 +261,10 @@ python -m pytest tests/test_rustbpe.py -v -s
 └── uv.lock
 ```
 
-## Contributing
 
-nanochat is nowhere near finished. The goal is to improve the state of the art in micro models that are accessible to work with end to end on budgets of < $1000 dollars. Accessibility is about overall cost but also about cognitive complexity - nanochat is not an exhaustively configurable LLM "framework"; there will be no giant configuration objects, model factories, or if-then-else monsters in the code base. It is a single, cohesive, minimal, readable, hackable, maximally-forkable "strong baseline" codebase designed to run start to end and produce a concrete ChatGPT clone and its report card.
 
-Current LLM policy: disclosure. When submitting a PR, please declare any parts that had substantial LLM contribution and that you have not written or that you do not fully understand.
 
-## Acknowledgements
 
-- The name (nanochat) derives from my earlier project [nanoGPT](https://github.com/karpathy/nanoGPT), which only covered pretraining.
-- nanochat is also inspired by [modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt), which gamified the nanoGPT repo with clear metrics and a leaderboard, and borrows a lot of its ideas and some implementation for pretraining.
-- Thank you to [HuggingFace](https://huggingface.co/) for fineweb and smoltalk.
-- Thank you [Lambda](https://lambda.ai/service/gpu-cloud) for the compute used in developing this project.
-- Thank you to chief LLM whisperer 🧙‍♂️ Alec Radford for advice/guidance.
-- Thank you to the repo czar Sofie [@svlandeg](https://github.com/svlandeg) for help with managing issues, pull requests and discussions of nanochat.
-
-## Cite
-
-If you find nanochat helpful in your research cite simply as:
-
-```bibtex
-@misc{nanochat,
-  author = {Andrej Karpathy},
-  title = {nanochat: The best ChatGPT that $100 can buy},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/karpathy/nanochat}
-}
-```
 
 ## License
 

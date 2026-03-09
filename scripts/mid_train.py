@@ -71,7 +71,12 @@ pretrain_batch_size = meta.get("device_batch_size", None)
 if pretrain_batch_size is not None and device_batch_size > pretrain_batch_size:
     print0(f"FOOTGUN WARNING: base model training used device_batch_size {pretrain_batch_size}, did you pass in a good --device_batch_size to this script?")
 orig_model = model
-model = torch.compile(model, dynamic=False)
+use_compile = os.environ.get("TORCH_COMPILE_DISABLE", "0") != "1"
+if use_compile:
+    print0("torch.compile enabled")
+    model = torch.compile(model, dynamic=False)
+else:
+    print0("torch.compile DISABLED via TORCH_COMPILE_DISABLE=1")
 depth = model.config.n_layer
 num_flops_per_token = model.estimate_flops()
 tokens_per_fwdbwd = device_batch_size * max_seq_len # tokens per iteration for a single rank
