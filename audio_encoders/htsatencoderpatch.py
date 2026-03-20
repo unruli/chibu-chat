@@ -1,4 +1,53 @@
 """
+HTSATEncoderPatched - A patched HTSAT encoder for flexible training workflows.
+
+This class extends HTSATEncoder to support multiple training modes with explicit
+control over gradient flow and feature extraction:
+
+Attributes:
+    config (HTSATPatchedConfig): Configuration object with training parameters.
+    freeze_encoder (bool): Whether to freeze the encoder backbone.
+    train_projection_when_frozen (bool): Whether to train projection head when 
+        encoder is frozen.
+
+Methods:
+    _extract_features(waveform: torch.Tensor) -> torch.Tensor
+        Runs the feature extractor and HTSAT forward pass to extract encoder features.
+        Handles multiple output formats from the underlying model.
+        
+        Args:
+            waveform: Input audio waveform tensor.
+            
+        Returns:
+            Extracted feature tensor from the model output.
+    
+    encode(audio_input, sample_rate, return_tokens, inference_mode) 
+        -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
+        Encodes audio input into HTSAT features with explicit inference/training control.
+        Supports multiple input formats (file paths, tensors, or lists of paths).
+        Respects gradient requirements based on inference_mode and freeze_encoder settings.
+        
+        Args:
+            audio_input: Audio input (file path string, tensor, or list of paths).
+            sample_rate: Sample rate for audio processing.
+            return_tokens: If True, returns both projected features and raw features.
+            inference_mode: If True, disables gradients; if False, respects freeze settings.
+            
+        Returns:
+            Projected features, optionally with raw features if return_tokens=True.
+    
+    forward(audio_input, sample_rate) -> torch.Tensor
+        Forward pass supporting three training modes:
+        - Mode A: Frozen encoder + trainable projection head
+        - Mode B: Fully frozen (inference)
+        - Mode C: Full/partial encoder fine-tuning (unfrozen)
+        
+        Args:
+            audio_input: Audio input (file path or tensor).
+            sample_rate: Sample rate for audio processing.
+            
+        Returns:
+            Projected feature embeddings.
 Patched HTSAT encoder module for accent-aware training workflows.
 
 This file keeps the original encoder intact and provides patched classes that:
