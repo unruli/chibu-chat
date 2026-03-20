@@ -1,0 +1,149 @@
+diff --git a/audio_encoders/htsat_encoder.py b/audio_encoders/htsat_encoder.py
+index 0000000..0000001 100644
+--- a/audio_encoders/htsat_encoder.py
++++ b/audio_encoders/htsat_encoder.py
+@@
+ @dataclass
+ class HTSATConfig:
+@@
+     use_projection: bool = True  # Project to custom dimension
+     projection_dim: int = 1280  # Match nanochat model_dim for d20
++    train_projection_when_frozen: bool = True
+@@
+ class HTSATEncoder(nn.Module):
+@@
+         if self.freeze_encoder:
+             self._freeze_encoder()
++
++    def _extract_features(self, waveform: torch.Tensor) -> torch.Tensor:
++        """
++        Run feature extractor + HTSAT forward and return encoder features.
++        This helper centralizes extraction logic for both inference and training.
++        """
++        if hasattr(self.feature_extractor, '__call__'):
++            inputs = self.feature_extractor(
++                waveform.cpu().numpy(),
++                sampling_rate=self.config.sample_rate,
++                return_tensors="pt"
++            )
++            inputs = {k: v.to(self.config.device) for k, v in inputs.items()}
++            outputs = self.model(**inputs)
++
++            if hasattr(outputs, 'last_hidden_state'):
++                return outputs.last_hidden_state
++            if hasattr(outputs, 'pooler_output'):
++                return outputs.pooler_output.unsqueeze(1)
++            return outputs[0]
++
++        return self.model(waveform)
+@@
+-    @torch.no_grad()
+     def encode(
+         self,
+         audio_input: Union[str, torch.Tensor, List[str]],
+         sample_rate: int = 16000,
+         return_tokens: bool = False,
++        inference_mode: bool = True,
+     ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+@@
+         Args:
+             audio_input: Audio file path, waveform tensor, or list of paths
+             sample_rate: Sample rate if waveform tensor is provided
+             return_tokens: If True, also returns hierarchical token features
++            inference_mode: If True, disables gradients for full encode pass
+@@
+         waveform = self.preprocess(waveform, sample_rate)
+         waveform = waveform.to(self.config.device, dtype=self.config.dtype)
+-
+-        # Extract features using the model
+-        if hasattr(self.feature_extractor, '__call__'):
+-            # HuggingFace processor
+-            inputs = self.feature_extractor(
+-                waveform.cpu().numpy(),
+-                sampling_rate=self.config.sample_rate,
+-                return_tensors="pt"
+-            )
+-            inputs = {k: v.to(self.config.device) for k, v in inputs.items()}
+-            outputs = self.model(**inputs)
+-
+-            # Get the appropriate output
+-            if hasattr(outputs, 'last_hidden_state'):
+-                features = outputs.last_hidden_state
+-            elif hasattr(outputs, 'pooler_output'):
+-                features = outputs.pooler_output.unsqueeze(1)
+-            else:
+-                features = outputs[0]
+-        else:
+-            # Direct model forward
+-            features = self.model(waveform)
++
++        if inference_mode:
++            with torch.no_grad():
++                features = self._extract_features(waveform)
++                projected = self.projection(features)
++        else:
++            features = self._extract_features(waveform)
++            projected = self.projection(features)
+-
+-        # Apply projection
+-        projected = self.projection(features)
+@@
+     def forward(
+         self,
+         audio_input: Union[str, torch.Tensor],
+         sample_rate: int = 16000,
+     ) -> torch.Tensor:
+@@
+-        if self.freeze_encoder:
+-            with torch.no_grad():
+-                return self.encode(audio_input, sample_rate)
+-        else:
+-            # Need to re-implement without @torch.no_grad for training
+-            if isinstance(audio_input, str):
+-                waveform = self.load_audio(audio_input)
+-                sample_rate = self.config.sample_rate
+-            else:
+-                waveform = audio_input
+-
+-            waveform = self.preprocess(waveform, sample_rate)
+-            waveform = waveform.to(self.config.device, dtype=self.config.dtype)
+-
+-            if hasattr(self.feature_extractor, '__call__'):
+-                inputs = self.feature_extractor(
+-                    waveform.cpu().numpy(),
+-                    sampling_rate=self.config.sample_rate,
+-                    return_tensors="pt"
+-                )
+-                inputs = {k: v.to(self.config.device) for k, v in inputs.items()}
+-                outputs = self.model(**inputs)
+-
+-                if hasattr(outputs, 'last_hidden_state'):
+-                    features = outputs.last_hidden_state
+-                else:
+-                    features = outputs[0]
+-            else:
+-                features = self.model(waveform)
+-
+-            return self.projection(features)
++        if isinstance(audio_input, str):
++            waveform = self.load_audio(audio_input)
++            sample_rate = self.config.sample_rate
++        else:
++            waveform = audio_input
++
++        waveform = self.preprocess(waveform, sample_rate)
++        waveform = waveform.to(self.config.device, dtype=self.config.dtype)
++
++        # Mode A: frozen encoder, train projection head only (good default for small accented sets)
++        if self.freeze_encoder and self.config.train_projection_when_frozen:
++            with torch.no_grad():
++                features = self._extract_features(waveform)
++            return self.projection(features)
++
++        # Mode B: fully frozen inference behavior
++        if self.freeze_encoder and not self.config.train_projection_when_frozen:
++            return self.encode(waveform, sample_rate=self.config.sample_rate, inference_mode=True)
++
++        # Mode C: full/partial HTSAT fine-tuning
++        features = self._extract_features(waveform)
++        return self.projection(features)
